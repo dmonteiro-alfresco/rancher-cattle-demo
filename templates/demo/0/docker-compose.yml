@@ -1,6 +1,16 @@
 version: '2'
 
 services:
+  proxy:
+      image: rancher/lb-service-haproxy:v0.5.9
+      links:
+      - process:process
+      ports:
+      - 80:80/tcp
+      labels:
+        io.rancher.scheduler.affinity:host_label: environment=testenv-daniel
+        io.rancher.container.agent.role: environmentAdmin
+        io.rancher.container.create_agent: 'true'
   process:
     image: alfresco/process-services:1.6.4
     environment:
@@ -24,12 +34,17 @@ services:
     depends_on:
       - elasticsearch
       - postgres
-
+    labels:
+      io.rancher.scheduler.affinity:host_label: environment=testenv-daniel
   elasticsearch:
     image: elasticsearch:1.7.3
+    labels:
+      io.rancher.scheduler.affinity:host_label: environment=testenv-daniel
   postgres:
     image: postgres:9.6.2
     environment:
       POSTGRES_DB: activiti
       POSTGRES_USER: alfresco
       POSTGRES_PASSWORD: alfresco
+    labels:
+      io.rancher.scheduler.affinity:host_label: environment=testenv-daniel
