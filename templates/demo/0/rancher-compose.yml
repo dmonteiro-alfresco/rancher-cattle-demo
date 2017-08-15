@@ -2,6 +2,13 @@
   name: demo
   version: v0.1
   description: test
+  questions:
+    - variable: aps_version
+      description: "Version of the APS"
+      label: "Alfresco Process Services Version"
+      type: "string"
+      required: true
+      default: "1.6.4"
 
 version: '2'
 services:
