@@ -1,0 +1,73 @@
+version: '2'
+services:
+  proxy:
+    scale: 1
+    start_on_create: true
+    lb_config:
+      certs: []
+      config: |-
+        global
+            maxconn 4096
+            maxpipes 1024
+        defaults
+            mode http
+            log global
+            option httplog
+            option dontlognull
+            option redispatch
+            option tcp-smart-accept
+            option tcp-smart-connect
+            option contstats
+
+            maxconn 2000
+
+            timeout http-request 10s
+            timeout queue 1m
+            timeout connect 5s
+            timeout client 2m
+            timeout server 2m
+            timeout http-keep-alive 10s
+            timeout check 5s
+            timeout tarpit          60s
+            retries 3
+
+            compression algo gzip
+            compression type text/html text/html;charset=utf-8 text/plain text/css text/javascript application/x-javascript application/javascript application/ecmascript application/rss+xml application/atomsvc+xml application/atom+xml application/atom+xml;type=entry application/atom+xml;type=feed application/cmisquery+xml application/cmisallowableactions+xml application/cmisatom+xml application/cmistree+xml application/cmisacl+xml application/msword application/vnd.ms-excel application/vnd.ms-powerpoint
+
+
+        frontend 80
+            capture request header X-Forwarded-For len 64
+            capture request header User-agent len 256
+            capture request header Cookie len 64
+            capture request header Accept-Language len 64
+            rspadd Strict-Transport-Security:\ max-age=15768000
+            acl activiti_path path_beg /activiti-app/
+            acl elb_health hdr(user-agent) -m beg -i ELB-HealthChecker
+            redirect location /activiti-app/ if !activiti_path
+            use_backend 80_activiti_app if activiti_path
+
+        backend 80_activiti_app
+            option log-health-checks
+            http-check expect rstatus ^4
+            option httpchk activiti-app/app/authentication/
+      port_rules:
+      - path: /activiti-app
+        protocol: http
+        service: process
+        source_port: 80
+        target_port: 8080
+    health_check:
+      response_timeout: 2000
+      healthy_threshold: 2
+      port: 42
+      unhealthy_threshold: 3
+      interval: 2000
+  process:
+    scale: 1
+    start_on_create: true
+  elasticsearch:
+    scale: 1
+    start_on_create: true
+  postgres:
+    scale: 1
+    start_on_create: true
