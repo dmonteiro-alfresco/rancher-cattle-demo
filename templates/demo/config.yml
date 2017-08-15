@@ -2,7 +2,7 @@
 name: Demo App
 description: >
   testing app for catalog.
-version: "0.1"
+version: v0.1
 category: Testing
 maintainer: Daniel Monteiro <daniel.monteiro@alfresco.com>
 license: Apache2

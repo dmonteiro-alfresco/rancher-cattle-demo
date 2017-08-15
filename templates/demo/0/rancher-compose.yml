@@ -1,3 +1,8 @@
+.catalog:
+  name: demo
+  version: v0.1
+  description: test
+
 version: '2'
 services:
   proxy:
